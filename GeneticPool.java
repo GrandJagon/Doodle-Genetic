@@ -25,7 +25,7 @@ public class GeneticPool {
 
     public void populate(){
         for(int i = 0 ; i < size; i ++){
-            Doodle doodle = new Doodle(Constants.FRAME_WIDTH/2, aliveDoodles, world, 10);
+            Doodle doodle = new Doodle(Constants.FRAME_WIDTH/2, aliveDoodles, world, Calc.randomInt(1, 20));
             individuals.add(doodle);
             world.getElements().add(doodle);
         }
@@ -55,7 +55,7 @@ public class GeneticPool {
         Collections.sort(individuals, new Comparator<Doodle>() {
             @Override
             public int compare(Doodle d1, Doodle d2) {
-                return d2.getScore() - d1.getScore();
+                return (int) d2.getScore() - (int) d1.getScore();
             }
         });
 
@@ -68,6 +68,7 @@ public class GeneticPool {
 
         for(int i = 0; i < amountToSave; i++){
             newGeneration.add(individuals.get(i));
+            System.out.println(individuals.get(i).getScore());
         }
 
         individuals = newGeneration;
@@ -79,6 +80,13 @@ public class GeneticPool {
             Doodle individual = individuals.get(j);
             individuals.add(individual.duplicate());
             j++;
+        }
+    }
+
+    public void mutateAll(){
+        for (Doodle d:individuals
+             ) {
+            d.unbiased_weight_mutation(mutationRate);
         }
     }
 

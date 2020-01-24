@@ -15,7 +15,7 @@ public class Doodle implements  Element {
     private int height;
     private int weight;
     private int jumpStrength;
-    private int score;
+    private double score;
     private boolean onGround;
     private boolean alive;
     private boolean onJump;
@@ -45,8 +45,12 @@ public class Doodle implements  Element {
         return position;
     }
 
-    public int getScore(){
+    public double getScore(){
         return score;
+    }
+
+    public Brain getBrain(){
+        return brain;
     }
 
     public void setOnGround(boolean b){
@@ -92,6 +96,9 @@ public class Doodle implements  Element {
 
     public void updateMotion() {
         if(onGround){
+            if(ground != null && ground.getIndex() > 0 && ground.getIndex() < 2 && score < 2){
+                score += 0.0001;
+            }
             velocityFinal.updateY(0);
             if (ground != null){
                 velocityFinal.updateX(ground.getSpeed() + motionVelocity.getX());
@@ -169,7 +176,7 @@ public class Doodle implements  Element {
 
     public void updateScore() {
         if (ground != null && score < ground.getIndex()) {
-            score = ground.getIndex();
+            score += ground.getIndex();
         }
     }
 
@@ -198,8 +205,10 @@ public class Doodle implements  Element {
         brain.feedInput(x, gx, gs, gw, upx, ups, upw);
     }
 
+    //Method that take the outputs of the forward propagation and interpret it in moves within the game
     public void decision(){
-        switch(brain.feedForward()){
+        int highest_output = Calc.getArrayMaxIndex(brain.feedForward());
+        switch(highest_output){
             case 0:
                 stay();
                 break;
@@ -215,6 +224,24 @@ public class Doodle implements  Element {
         }
     }
 
+    public void multi_decision(){
+        double[] outputs = brain.feedForward();
+
+        if(outputs[0] > 0.5){
+            stay();
+        }
+        if(outputs[1] > 0.5){
+            right();
+        }
+        if(outputs[2] > 0.5){
+            left();
+        }
+        if(outputs[3] > 0.5){
+            jump();
+        }
+    }
+
+    //Returns the exact same doodle from the original one
     public Doodle duplicate(){
         Doodle clone;
 
@@ -223,9 +250,37 @@ public class Doodle implements  Element {
         return clone;
     }
 
-    public void mutate(double rate){
+    //Method that randomly mutates n genes according to a rate by assigning unfirmoly randon new values
+    public void unbiased_weight_mutation(double rate){
+        int amount_mutations = (int) (brain.getTotal_features() * rate);
 
+        int[] genes = new int[amount_mutations];
+
+        for(int i = 0; i < genes.length; i++){
+            genes[i] = Calc.getRand().nextInt(genes.length);
+        }
+
+        for (Integer i: genes
+             ) {
+            if(i < brain.getW1Features()){
+                int m = i / brain.getHidden_layer_size();
+                int n = i - (m * brain.getHidden_layer_size());
+                brain.getW1()[m][n] = Calc.randomDouble(-1, 1);
+            }else{
+                i = i - brain.getW1Features();
+                int m = i / brain.getOutput_layer_size();
+                int n = i - (m * brain.getOutput_layer_size());
+                brain.getW2()[m][n] = Calc.randomDouble(-1, 1);
+            }
+        }
     }
+
+//    public Doodle breed(Doodle d){
+//        int hidden_layer_size = d.getBrain().getHidden_layer_size();
+//
+//        Doodle child = new Doodle()
+//
+//    }
 
 
 

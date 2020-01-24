@@ -11,6 +11,10 @@ public class Calc {
         rand = new Random(seed);
     }
 
+    public static Random getRand(){
+        return rand;
+    }
+
     public static double sigmoid(double x){
         return (1/(1 + Math.pow(Math.E, (-1 * x))));
     }
@@ -29,6 +33,14 @@ public class Calc {
         return c;
     }
 
+    public static double randomDouble(int min, int max){
+        return min + (rand.nextDouble() * ( max - min ));
+    }
+
+    public static int randomInt(int min, int max){
+        return rand.nextInt(19) + 1;
+    }
+
     public static double[][] randMatrix(int m, int n){
         double[][] a = new double[m][n];
 
@@ -39,6 +51,19 @@ public class Calc {
         }
         return a;
     }
+
+    public static double[][] randMatrix(int m, int n, int min, int max){
+        double[][] a = new double[m][n];
+
+
+        for(int i = 0; i < m; i++){
+            for(int j = 0; j < n; j++){
+                a[i][j] = randomDouble(min, max);
+            }
+        }
+        return a;
+    }
+
 
     public static double[][] biasMatrix(int m, int n, int x){
         double[][] a = new double[m][n];

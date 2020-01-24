@@ -32,29 +32,64 @@ public class Brain {
         return w2;
     }
 
+    public double[][] getB1(){ return b1; }
+
+    public double[][] getB2(){ return b2; }
+
     public int getHidden_layer_size(){
         return hidden_layer_size;
     }
 
+    public int getOutput_layer_size(){
+        return output_layer_size;
+    }
+
+    public int getW1Features(){
+        return input_layer_size * hidden_layer_size;
+    }
+
+    public int getW2Features(){
+        return hidden_layer_size * output_layer_size;
+    }
+
+    public int getTotal_features(){
+        return (input_layer_size * hidden_layer_size) + (hidden_layer_size * output_layer_size);
+    }
+
+    //Random init method for the first generation
     public void init(){
         this.X = new double[1][input_layer_size];
         this.Y = new double[1][output_layer_size];
-        this.w1 = Calc.randMatrix(input_layer_size, hidden_layer_size);
-        this.w2 = Calc.randMatrix(hidden_layer_size, output_layer_size);
+        this.w1 = Calc.randMatrix(input_layer_size, hidden_layer_size, -1, 1);
+        this.w2 = Calc.randMatrix(hidden_layer_size, output_layer_size, -1 , 1);
         this.b1 = Calc.biasMatrix(1,hidden_layer_size, 1);
         this.b2 = Calc.biasMatrix(1, output_layer_size, 0);
     }
 
-    public int feedForward(){
+
+    //Init method with external paramters in case of breeding between 2 individuals
+    public void init(double[][] w1, double[][] w2, double[][] b1, double[][] b2){
+        this.X = new double[1][input_layer_size];
+        this.Y = new double[1][output_layer_size];
+        this.w1 = w1;
+        this.w2 = w2;
+        this.b1 = b1;
+        this.b2 = b2;
+
+    }
+
+    //Neural network forward propagation method that returns a set of outputs to be used within the doodle class
+    public double[] feedForward(){
         double[][] Z1 = Calc.add(Calc.dot(X, w1), b1);
         double[][] A1 = Calc.sigmoid(Z1);
 
         double[][] Z2 = Calc.add(Calc.dot(A1, w2), b2);
         Y = Calc.sigmoid(Z2);
 
-        return Calc.getArrayMaxIndex(Y[0]);
+        return Y[0];
     }
 
+    //Method that feeds all data relative to doodle environment in order to feed the forward propagation
     public void feedInput(double doodleX, double groundX, double groundSpeed, double groundWidth, double upperPlatformX, double upperPlatformSpeed, double upperPlatFormWidth){
         X[0][0] = doodleX;
         X[0][1] = groundX;

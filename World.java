@@ -34,7 +34,7 @@ public class World extends JPanel implements Runnable {
         ptIndex = 0;
         popRatio = 60;
         rand = new Random();
-        genePool = new GeneticPool(100, 0.25, 0.25, 0.25,this);
+        genePool = new GeneticPool(100, 0.25, 0.1, 0.25,this);
         genePool.populate();
         gameStats = dashboard;
         gameStats.init(genePool);
@@ -121,7 +121,7 @@ public class World extends JPanel implements Runnable {
                 element.paint(offGraphics, camera);
             }else{
                 element.remove();
-                if(elements.size() <= 0){
+                if(genePool.getAliveDoodles().size() <= 0){
                     gameOver();
                 }
             }
@@ -138,15 +138,20 @@ public class World extends JPanel implements Runnable {
 
     public void gameOver(){
         running = false;
+        ptIndex = 0;
         camera.reset();
-        elements = new LinkedList<Element>();
         genePool.sortPopulation();
         genePool.naturalSelection();
         genePool.duplication();
+        genePool.mutateAll();
     }
 
     public void launchNextGeneration(){
+        camera = new Camera(this);
+        elements = new LinkedList<>();
+        platforms = new LinkedList<>();
         init_platforms();
+        gameStats.reset();
         for (Doodle d : genePool.getIndividuals()
              ) {
             d.reset();
