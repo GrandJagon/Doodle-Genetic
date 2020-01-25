@@ -19,7 +19,7 @@ public class Brain {
         this.hidden_layer_size = hidden_layer_size;
         this.hidden_layers = 1;
         this.input_layer_size = 7;
-        this.output_layer_size = 4;
+        this.output_layer_size = 3;
         this.rand = new Random();
         init();
     }
@@ -63,7 +63,7 @@ public class Brain {
         this.w1 = Calc.randMatrix(input_layer_size, hidden_layer_size, -1, 1);
         this.w2 = Calc.randMatrix(hidden_layer_size, output_layer_size, -1 , 1);
         this.b1 = Calc.biasMatrix(1,hidden_layer_size, 1);
-        this.b2 = Calc.biasMatrix(1, output_layer_size, 0);
+        this.b2 = Calc.biasMatrix(1, output_layer_size, 1);
     }
 
 

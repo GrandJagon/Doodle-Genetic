@@ -34,7 +34,7 @@ public class World extends JPanel implements Runnable {
         ptIndex = 0;
         popRatio = 60;
         rand = new Random();
-        genePool = new GeneticPool(100, 0.25, 0.1, 0.25,this);
+        genePool = new GeneticPool(100, 0.25, 0.3, 0.1,this);
         genePool.populate();
         gameStats = dashboard;
         gameStats.init(genePool);
@@ -105,6 +105,7 @@ public class World extends JPanel implements Runnable {
             }
             d.updateScore();
         }
+        gameStats.updateDashboard();
     }
 
     public void render(){
@@ -155,6 +156,7 @@ public class World extends JPanel implements Runnable {
         for (Doodle d : genePool.getIndividuals()
              ) {
             d.reset();
+            d.setContainer(genePool.getAliveDoodles());
             elements.add(d);
         }
         start();
@@ -175,7 +177,6 @@ public class World extends JPanel implements Runnable {
             update();
             render();
             paint();
-            gameStats.updateDashboard();
 
             try{
                 startTime += delay;

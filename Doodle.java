@@ -57,6 +57,11 @@ public class Doodle implements  Element {
         this.onGround = b;
     }
 
+    public void setContainer(LinkedList<Doodle> container){
+        this.container = container;
+        this.container.add(this);
+    }
+
     public void removeGround(){
         this.ground = null;
     }
@@ -89,7 +94,7 @@ public class Doodle implements  Element {
     @Override
     public void update(){
         getEnvironmentData();
-        decision();
+        multi_decision();
         updateMotion();
     }
 
@@ -120,7 +125,7 @@ public class Doodle implements  Element {
 
     @Override
     public boolean isOnScreen(Camera camera) {
-        if (position.getY() <= camera.getBottom() && position.getY() >= camera.getTop()) {
+        if (position.getY() < camera.getBottom() && position.getY() >= camera.getTop()) {
             return true;
         } else {
             alive = false;
@@ -205,7 +210,7 @@ public class Doodle implements  Element {
         brain.feedInput(x, gx, gs, gw, upx, ups, upw);
     }
 
-    //Method that take the outputs of the forward propagation and interpret it in moves within the game
+    //Method that take the outputs of the forward propagation and interpret it in moves within the game, 4 output neurons
     public void decision(){
         int highest_output = Calc.getArrayMaxIndex(brain.feedForward());
         switch(highest_output){
@@ -224,28 +229,30 @@ public class Doodle implements  Element {
         }
     }
 
+
+    //Same method than decision but only takes 3 output neurons and allows the doodle to jump and move at the same time
     public void multi_decision(){
         double[] outputs = brain.feedForward();
 
         if(outputs[0] > 0.5){
-            stay();
-        }
-        if(outputs[1] > 0.5){
             right();
         }
-        if(outputs[2] > 0.5){
+        if(outputs[1] > 0.5){
             left();
         }
-        if(outputs[3] > 0.5){
+        if(outputs[2] > 0.5){
             jump();
+        }
+        if(outputs[0] < 0.5 && outputs[1] < 0.5 & outputs[2] < 0.5){
+            stay();
         }
     }
 
     //Returns the exact same doodle from the original one
     public Doodle duplicate(){
-        Doodle clone;
+        Doodle clone = new Doodle(Constants.FRAME_WIDTH/2, container, world, brain.getHidden_layer_size());
 
-        clone = this;
+        clone.getBrain().init(brain.getW1(), brain.getW2(), brain.getB1(), brain.getB2());
 
         return clone;
     }
@@ -271,6 +278,30 @@ public class Doodle implements  Element {
                 int m = i / brain.getOutput_layer_size();
                 int n = i - (m * brain.getOutput_layer_size());
                 brain.getW2()[m][n] = Calc.randomDouble(-1, 1);
+            }
+        }
+    }
+
+    public void biased_weight_mutation(double rate){
+        int amount_mutations = (int) (brain.getTotal_features() * rate);
+
+        int[] genes = new int[amount_mutations];
+
+        for(int i = 0; i < genes.length; i++){
+            genes[i] = Calc.getRand().nextInt(genes.length);
+        }
+
+        for (Integer i: genes
+        ) {
+            if(i < brain.getW1Features()){
+                int m = i / brain.getHidden_layer_size();
+                int n = i - (m * brain.getHidden_layer_size());
+                brain.getW1()[m][n] += Calc.randomDouble(-1, 1);
+            }else{
+                i = i - brain.getW1Features();
+                int m = i / brain.getOutput_layer_size();
+                int n = i - (m * brain.getOutput_layer_size());
+                brain.getW2()[m][n] += Calc.randomDouble(-1, 1);
             }
         }
     }

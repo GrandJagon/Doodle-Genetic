@@ -35,6 +35,18 @@ public class GeneticPool {
         return aliveDoodles;
     }
 
+    public int getAverageScore(){
+        int total = 0;
+        for (Doodle d: individuals
+             ) {
+            total += d.getScore();
+        }
+
+        total = total / individuals.size();
+
+        return total;
+    }
+
     public Doodle getHighestDoodle(){
         Doodle bestDoodle = aliveDoodles.get(0);
         for (Doodle d : aliveDoodles
@@ -62,16 +74,18 @@ public class GeneticPool {
     }
 
     public void naturalSelection(){
+
         int amountToSave = (int) (individuals.size() * selectionRate);
 
         LinkedList<Doodle> newGeneration = new LinkedList<>();
 
         for(int i = 0; i < amountToSave; i++){
             newGeneration.add(individuals.get(i));
-            System.out.println(individuals.get(i).getScore());
         }
 
         individuals = newGeneration;
+        this.aliveDoodles = new LinkedList<>();
+
     }
 
     public void duplication(){
@@ -79,6 +93,15 @@ public class GeneticPool {
         for(int i = individuals.size(); i < size; i++){
             Doodle individual = individuals.get(j);
             individuals.add(individual.duplicate());
+            j++;
+        }
+    }
+
+    public void newRandomIndividuals(){
+        int j = 0;
+        for(int i = individuals.size(); i < size; i++){
+            Doodle individual = individuals.get(j);
+            individuals.add(new Doodle(Constants.FRAME_WIDTH/2, aliveDoodles, world, Calc.randomInt(1, 20)));
             j++;
         }
     }

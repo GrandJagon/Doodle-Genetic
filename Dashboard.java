@@ -11,6 +11,7 @@ public class Dashboard extends JPanel {
     private JLabel individuals;
     private JLabel alive_individuals;
     private JLabel number_neurons;
+    private JLabel average_score;
     private Button startButton;
     private Button newGeneration;
     private Button stopButton;
@@ -27,9 +28,11 @@ public class Dashboard extends JPanel {
     public void init(GeneticPool genePool){
         this.genePool = genePool;
         score = new JLabel("Best doodle score : ");
+        average_score = new JLabel("Average score : ");
         individuals = new JLabel("Number of individuals in the generation :");
         alive_individuals = new JLabel("Number of individuals alive in the generation");
         number_neurons = new JLabel("Number of neurons of the best doodle : ");
+
 
         stopButton = new Button("END GENERATION");
         newGeneration = new Button("LAUNCH NEW GENERATION");
@@ -49,6 +52,7 @@ public class Dashboard extends JPanel {
         });
 
         add(score);
+        add(average_score);
         add(individuals);
         add(alive_individuals);
         add(number_neurons);
@@ -60,6 +64,7 @@ public class Dashboard extends JPanel {
         individuals.setText("Number of individuals in the generation : " + genePool.getIndividuals().size());
         alive_individuals.setText("Number of individuals alive in the generation : " + genePool.getAliveDoodles().size());
         score.setText("Best doodle score : " + String.valueOf(world.getBestDoodle().getScore()));
+        average_score = new JLabel("Average score : " + genePool.getAverageScore());
         number_neurons.setText("Number of neurons of the best doodle " + world.getBestDoodle().getBrain().getHidden_layer_size());;
     }
 
