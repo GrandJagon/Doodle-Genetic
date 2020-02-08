@@ -6,6 +6,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
 
@@ -13,7 +14,7 @@ public class World extends JPanel implements Runnable {
     private boolean running;
     private Thread animator;
     private LinkedList<Element> elements;
-    private LinkedList<Platform> platforms;
+    private ArrayList<Platform> platforms;
     private GeneticPool genePool;
     private Graphics2D offGraphics;
     private Dashboard gameStats;
@@ -29,12 +30,12 @@ public class World extends JPanel implements Runnable {
         setVisible(true);
         setFocusable(true);
         elements = new LinkedList<>();
-        platforms = new LinkedList<>();
+        platforms = new ArrayList<>();
         camera = new Camera(this);
         ptIndex = 0;
-        popRatio = 60;
+        popRatio = Constants.PLATFORM_POP_RATIO;
         rand = new Random();
-        genePool = new GeneticPool(100, 0.25, 0.3, 0.1,this);
+        genePool = new GeneticPool(50, 0.25, 0.2, 0.1,this);
         genePool.populate();
         gameStats = dashboard;
         gameStats.init(genePool);
@@ -48,7 +49,7 @@ public class World extends JPanel implements Runnable {
     }
 
     public Doodle getBestDoodle(){
-        return genePool.getHighestDoodle();
+        return genePool.getBestDoodle();
     }
 
     public Platform getFirstPlatform(){
@@ -75,7 +76,8 @@ public class World extends JPanel implements Runnable {
     }
 
     public void addPlatform(){
-        int y = platforms.getLast().getPosition().getY();
+        System.out.println("Adding platform");
+        int y = platforms.get(platforms.size() - 1).getPosition().getY();
         Platform pt = generate_platform(Constants.PLATFORM_MINIMUM_SPEED, Constants.PLATFORM_MAXIMUM_WIDTH, y - popRatio);
         elements.add(pt);
         platforms.add(pt);
@@ -143,14 +145,14 @@ public class World extends JPanel implements Runnable {
         camera.reset();
         genePool.sortPopulation();
         genePool.naturalSelection();
-        genePool.duplication();
-        genePool.mutateAll();
+        genePool.mutatePopulation();
+        genePool.newRandomIndividuals();
     }
 
     public void launchNextGeneration(){
         camera = new Camera(this);
         elements = new LinkedList<>();
-        platforms = new LinkedList<>();
+        platforms = new ArrayList<>();
         init_platforms();
         gameStats.reset();
         for (Doodle d : genePool.getIndividuals()

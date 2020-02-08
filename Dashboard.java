@@ -65,7 +65,7 @@ public class Dashboard extends JPanel {
         alive_individuals.setText("Number of individuals alive in the generation : " + genePool.getAliveDoodles().size());
         score.setText("Best doodle score : " + String.valueOf(world.getBestDoodle().getScore()));
         average_score = new JLabel("Average score : " + genePool.getAverageScore());
-        number_neurons.setText("Number of neurons of the best doodle " + world.getBestDoodle().getBrain().getHidden_layer_size());;
+//        number_neurons.setText("Number of neurons of the best doodle " + world.getBestDoodle().getBrain().getHidden_layer_size());;
     }
 
     public void reset(){

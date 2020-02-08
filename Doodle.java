@@ -6,7 +6,7 @@ import java.awt.*;
 import java.util.LinkedList;
 
 public class Doodle implements  Element {
-    private Brain brain;
+    private NN NN;
     private Vector position;
     private Vector velocityFinal;
     private Vector motionVelocity;
@@ -24,7 +24,7 @@ public class Doodle implements  Element {
     private World world;
 
 
-    public Doodle(int x, LinkedList<Doodle> container, World world, int hidden_layer_size) {
+    public Doodle(int x, LinkedList<Doodle> container, World world, GeneticPool genePool) {
         this.position = new Vector(x, Constants.FRAME_HEIGHT - height);
         this.alive = true;
         this.width = 20;
@@ -38,7 +38,8 @@ public class Doodle implements  Element {
         this.container = container;
         this.container.add(this);
         this.world = world;
-        this.brain = new Brain(hidden_layer_size);
+        this.NN = new Genome(genePool);
+        NN.init();
     }
 
     public Vector getPosition() {
@@ -49,8 +50,8 @@ public class Doodle implements  Element {
         return score;
     }
 
-    public Brain getBrain(){
-        return brain;
+    public NN getNN(){
+        return NN;
     }
 
     public void setOnGround(boolean b){
@@ -101,7 +102,7 @@ public class Doodle implements  Element {
 
     public void updateMotion() {
         if(onGround){
-            if(ground != null && ground.getIndex() > 0 && ground.getIndex() < 2 && score < 2){
+            if(ground != null && ground.getIndex() > 0 && ground.getIndex() > (score - 0.5)){
                 score += 0.0001;
             }
             velocityFinal.updateY(0);
@@ -181,7 +182,7 @@ public class Doodle implements  Element {
 
     public void updateScore() {
         if (ground != null && score < ground.getIndex()) {
-            score += ground.getIndex();
+            score = ground.getIndex();
         }
     }
 
@@ -207,12 +208,12 @@ public class Doodle implements  Element {
         double ups = Calc.normalize(Constants.PLATFORM_MAXIMUM_SPEED, Constants.PLATFORM_MINIMUM_SPEED, upperPlatform.getSpeed());
         double upw = Calc.normalize(Constants.PLATFORM_MAXIMUM_WIDTH, Constants.PLATFORM_MINIMUM_WIDTH, upperPlatform.getWidth());
 
-        brain.feedInput(x, gx, gs, gw, upx, ups, upw);
+        NN.feedInput(x, gx, gs, gw, upx, ups, upw);
     }
 
     //Method that take the outputs of the forward propagation and interpret it in moves within the game, 4 output neurons
     public void decision(){
-        int highest_output = Calc.getArrayMaxIndex(brain.feedForward());
+        int highest_output = Calc.getArrayMaxIndex(NN.feedForward());
         switch(highest_output){
             case 0:
                 stay();
@@ -232,7 +233,7 @@ public class Doodle implements  Element {
 
     //Same method than decision but only takes 3 output neurons and allows the doodle to jump and move at the same time
     public void multi_decision(){
-        double[] outputs = brain.feedForward();
+        double[] outputs = NN.feedForward();
 
         if(outputs[0] > 0.5){
             right();
@@ -249,62 +250,68 @@ public class Doodle implements  Element {
     }
 
     //Returns the exact same doodle from the original one
-    public Doodle duplicate(){
-        Doodle clone = new Doodle(Constants.FRAME_WIDTH/2, container, world, brain.getHidden_layer_size());
-
-        clone.getBrain().init(brain.getW1(), brain.getW2(), brain.getB1(), brain.getB2());
-
-        return clone;
-    }
+//    public Doodle duplicate(){
+//        Doodle clone = new Doodle(Constants.FRAME_WIDTH/2, container, world, brain.getHidden_layer_size());
+//
+//        clone.getBrain().init(brain.getW1(), brain.getW2(), brain.getB1(), brain.getB2());
+//
+//        return clone;
+//    }
 
     //Method that randomly mutates n genes according to a rate by assigning unfirmoly randon new values
-    public void unbiased_weight_mutation(double rate){
-        int amount_mutations = (int) (brain.getTotal_features() * rate);
-
-        int[] genes = new int[amount_mutations];
-
-        for(int i = 0; i < genes.length; i++){
-            genes[i] = Calc.getRand().nextInt(genes.length);
-        }
-
-        for (Integer i: genes
-             ) {
-            if(i < brain.getW1Features()){
-                int m = i / brain.getHidden_layer_size();
-                int n = i - (m * brain.getHidden_layer_size());
-                brain.getW1()[m][n] = Calc.randomDouble(-1, 1);
-            }else{
-                i = i - brain.getW1Features();
-                int m = i / brain.getOutput_layer_size();
-                int n = i - (m * brain.getOutput_layer_size());
-                brain.getW2()[m][n] = Calc.randomDouble(-1, 1);
-            }
-        }
-    }
-
-    public void biased_weight_mutation(double rate){
-        int amount_mutations = (int) (brain.getTotal_features() * rate);
-
-        int[] genes = new int[amount_mutations];
-
-        for(int i = 0; i < genes.length; i++){
-            genes[i] = Calc.getRand().nextInt(genes.length);
-        }
-
-        for (Integer i: genes
-        ) {
-            if(i < brain.getW1Features()){
-                int m = i / brain.getHidden_layer_size();
-                int n = i - (m * brain.getHidden_layer_size());
-                brain.getW1()[m][n] += Calc.randomDouble(-1, 1);
-            }else{
-                i = i - brain.getW1Features();
-                int m = i / brain.getOutput_layer_size();
-                int n = i - (m * brain.getOutput_layer_size());
-                brain.getW2()[m][n] += Calc.randomDouble(-1, 1);
-            }
-        }
-    }
+//    public void unbiased_weight_mutation(double rate){
+//        int amount_mutations = (int) (brain.getTotal_features() * rate);
+//
+//        int[] genes = new int[amount_mutations];
+//
+//        for(int i = 0; i < genes.length; i++){
+//            genes[i] = Calc.getRand().nextInt(genes.length);
+//        }
+//
+//        for (Integer i: genes
+//             ) {
+//            if(i < brain.getW1Features()){
+//                int m = i / brain.getHidden_layer_size();
+//                int n = i - (m * brain.getHidden_layer_size());
+//                double previous = brain.getW1()[m][n];
+//                brain.getW1()[m][n] = Calc.randomDouble(-1, 1);
+//                System.out.println("Mutation of W1["+m+"]["+n+"], previous : "+previous+" new :" + brain.getW1()[m][n]);
+//            }else{
+//                i = i - brain.getW1Features();
+//                int m = i / brain.getOutput_layer_size();
+//                int n = i - (m * brain.getOutput_layer_size());
+//                double previous = brain.getW2()[m][n];
+//                brain.getW2()[m][n] = Calc.randomDouble(-1, 1);
+//                System.out.println("Mutation of W1["+m+"]["+n+"], previous : "+previous+" new :" + brain.getW2()[m][n]);
+//            }
+//        }
+//    }
+//
+//    public void biased_weight_mutation(double rate){
+//        int amount_mutations = (int) (brain.getTotal_features() * rate);
+//
+//        int[] genes = new int[amount_mutations];
+//
+//        for(int i = 0; i < genes.length; i++){
+//            genes[i] = Calc.getRand().nextInt(brain.getTotal_features());
+//        }
+//
+//        for (Integer i: genes
+//        ) {
+//            if(i < brain.getW1Features()){
+//                int m = i / brain.getHidden_layer_size();
+//                int n = i - (m * brain.getHidden_layer_size());
+//                double previous = brain.getW1()[m][n];
+//                brain.getW1()[m][n] += Calc.randomDouble(-1, 1);
+//            }else{
+//                i = i - brain.getW1Features();
+//                int m = i / brain.getOutput_layer_size();
+//                int n = i - (m * brain.getOutput_layer_size());
+//                double previous = brain.getW2()[m][n];
+//                brain.getW2()[m][n] += Calc.randomDouble(-1, 1);
+//            }
+//        }
+//    }
 
 //    public Doodle breed(Doodle d){
 //        int hidden_layer_size = d.getBrain().getHidden_layer_size();

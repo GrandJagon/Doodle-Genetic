@@ -1,6 +1,7 @@
 package com.company;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 public class Platform implements Element {
@@ -10,9 +11,9 @@ public class Platform implements Element {
     private int height;
     private int speed;
     private int index;
-    private LinkedList<Platform> container;
+    private ArrayList<Platform> container;
 
-    public Platform(int x, int y, int width, int speed, int index, LinkedList<Platform> container) {
+    public Platform(int x, int y, int width, int speed, int index, ArrayList<Platform> container) {
         this.position = new Vector(x, y);
         this.width = width;
         this.height = 10;

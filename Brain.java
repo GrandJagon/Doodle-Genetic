@@ -2,7 +2,7 @@ package com.company;
 
 import java.util.Random;
 
-public class Brain {
+public class Brain implements NN {
     private int hidden_layers;
     private int hidden_layer_size;
     private int input_layer_size;
@@ -36,7 +36,7 @@ public class Brain {
 
     public double[][] getB2(){ return b2; }
 
-    public int getHidden_layer_size(){
+    public int getHidden(){
         return hidden_layer_size;
     }
 
@@ -98,6 +98,10 @@ public class Brain {
         X[0][4] = upperPlatformX;
         X[0][5] = upperPlatformSpeed;
         X[0][6] = upperPlatFormWidth;
+    }
+
+    public void mutate(){
+
     }
 
 

@@ -6,6 +6,7 @@ public class Camera {
     private int position;
     private int oldPosition;
     private int newPosition;
+    private int distToNextPlatForm = Constants.PLATFORM_POP_RATIO;
     private World world;
     private int total_distance;
     private float tempX;
@@ -40,8 +41,11 @@ public class Camera {
                 oldPosition = position;
                 position = newPosition;
                 total_distance = total_distance + (oldPosition - newPosition);
-                if (total_distance % world.getPopRatio() == 0) {
+                distToNextPlatForm -= (oldPosition - newPosition);
+                if (distToNextPlatForm <= 0) {
+                    System.out.println("Calling addPlatform()");
                     world.addPlatform();
+                    distToNextPlatForm = Constants.PLATFORM_POP_RATIO;
                 }
             }
         }
