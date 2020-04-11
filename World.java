@@ -35,7 +35,7 @@ public class World extends JPanel implements Runnable {
         ptIndex = 0;
         popRatio = Constants.PLATFORM_POP_RATIO;
         rand = new Random();
-        genePool = new GeneticPool(50, 0.25, 0.2, 0.1,this);
+        genePool = new GeneticPool(10, 0.2,this);
         genePool.populate();
         gameStats = dashboard;
         gameStats.init(genePool);
@@ -81,6 +81,7 @@ public class World extends JPanel implements Runnable {
         Platform pt = generate_platform(Constants.PLATFORM_MINIMUM_SPEED, Constants.PLATFORM_MAXIMUM_WIDTH, y - popRatio);
         elements.add(pt);
         platforms.add(pt);
+        System.out.println("New platform added, new size of platfor container is "+platforms.size());
     }
 
     public void start(){

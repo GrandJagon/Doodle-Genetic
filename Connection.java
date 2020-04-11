@@ -1,15 +1,15 @@
 package com.company;
 
 public class Connection {
-    private Node input;
-    private Node output;
+    private int inNode;
+    private int outNode;
     private double weight;
     private boolean enabled;
     private int innovation_number;
 
-    public Connection(Node input, Node output, double weight, int innovation_number){
-        this.input = input;
-        this.output = output;
+    public Connection(int inNode, int outNode, double weight, int innovation_number){
+        this.inNode = inNode;
+        this.outNode = outNode;
         this.weight = weight;
         this.innovation_number = innovation_number;
         this.enabled = true;
@@ -27,24 +27,28 @@ public class Connection {
         }
     }
 
+    public void setActivation(boolean activation){
+        this.enabled = activation;
+    }
+
     public boolean isEnabled(){
         return enabled;
     }
 
-    public Node getInput(){
-        return input;
+    public int getInNode(){
+        return inNode;
     }
 
-    public void setInput(Node input){
-        this.input = input;
+    public int getOutNode(){
+        return outNode;
     }
 
-    public Node getOutput(){
-        return output;
+    public void setInNode(int inNode) {
+        this.inNode = inNode;
     }
 
-    public void setOutput(Node output){
-        this.output = output;
+    public void setOutNode(int outNode) {
+        this.outNode = outNode;
     }
 
     public void setWeight(double weight){
@@ -57,5 +61,10 @@ public class Connection {
 
     public int getInnovation_number(){
         return innovation_number;
+    }
+
+    public Connection copy(){
+        Connection copy = new Connection(this.inNode, this.outNode, this.weight, this.innovation_number);
+        return copy;
     }
 }

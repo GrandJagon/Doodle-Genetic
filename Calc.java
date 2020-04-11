@@ -37,6 +37,10 @@ public class Calc {
         return min + (rand.nextDouble() * ( max - min ));
     }
 
+    public static double randomDouble(double min, double max){
+        return min + (rand.nextDouble() * ( max - min ));
+    }
+
     public static int randomInt(int min, int max){
         return rand.nextInt(19) + 1;
     }

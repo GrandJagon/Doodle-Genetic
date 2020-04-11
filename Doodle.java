@@ -1,7 +1,5 @@
 package com.company;
 
-import com.sun.xml.internal.bind.v2.runtime.reflect.opt.Const;
-
 import java.awt.*;
 import java.util.LinkedList;
 
@@ -19,6 +17,7 @@ public class Doodle implements  Element {
     private boolean onGround;
     private boolean alive;
     private boolean onJump;
+    private GeneticPool genePool;
     private LinkedList<Doodle> container;
     private Platform ground;
     private World world;
@@ -38,8 +37,27 @@ public class Doodle implements  Element {
         this.container = container;
         this.container.add(this);
         this.world = world;
-        this.NN = new Genome(genePool);
-        NN.init();
+        this.genePool = genePool;
+        this.NN = new Genome(this.genePool);
+        NN.create();
+        NN.generateNN();
+    }
+
+    public Doodle(Doodle parent){
+        this.position = new Vector(parent.getPosition().getX(), Constants.FRAME_HEIGHT - height);
+        this.alive = true;
+        this.width = 20;
+        this.height = 20;
+        this.score = 0;
+        this.weight = Constants.DOODLE_WEIGHT;
+        this.onGround = false;
+        this.onJump = false;
+        this.velocityFinal = new Vector(0,0);
+        this.motionVelocity = new Vector(0,0);
+        this.container = parent.getContainer();
+        this.container.add(this);
+        this.world = parent.getWorld();
+        this.NN = parent.getNN().clone();
     }
 
     public Vector getPosition() {
@@ -52,6 +70,18 @@ public class Doodle implements  Element {
 
     public NN getNN(){
         return NN;
+    }
+
+    public World getWorld(){
+        return world;
+    }
+
+    public LinkedList<Doodle> getContainer(){
+        return container;
+    }
+
+    public GeneticPool getGenePool(){
+        return this.genePool;
     }
 
     public void setOnGround(boolean b){
@@ -74,7 +104,7 @@ public class Doodle implements  Element {
     @Override
     public void paint(Graphics2D graphics, Camera c) {
         tempY = position.getY() - c.getTop();
-        graphics.setPaint(Color.GREEN);
+        graphics.setPaint(Color.getHSBColor(255, 255, 50 + (255/(getNN().getHidden()*10))));
         graphics.drawOval(position.getX(), tempY, width, height);
         graphics.fillOval(position.getX(), tempY, width, height);
     }
@@ -181,8 +211,10 @@ public class Doodle implements  Element {
     }
 
     public void updateScore() {
-        if (ground != null && score < ground.getIndex()) {
-            score = ground.getIndex();
+        if (ground != null) {
+            if(score < ground.getIndex()){
+               score += ground.getIndex();
+            }
         }
     }
 
@@ -236,27 +268,30 @@ public class Doodle implements  Element {
         double[] outputs = NN.feedForward();
 
         if(outputs[0] > 0.5){
+            System.out.println("Right as output :"+outputs[0]);
             right();
         }
         if(outputs[1] > 0.5){
+            System.out.println("Left as output :"+outputs[1]);
             left();
         }
         if(outputs[2] > 0.5){
+            System.out.println("Jum as output :"+outputs[2]);
             jump();
         }
         if(outputs[0] < 0.5 && outputs[1] < 0.5 & outputs[2] < 0.5){
+            System.out.println("Stay as output");
             stay();
         }
     }
 
     //Returns the exact same doodle from the original one
-//    public Doodle duplicate(){
-//        Doodle clone = new Doodle(Constants.FRAME_WIDTH/2, container, world, brain.getHidden_layer_size());
-//
-//        clone.getBrain().init(brain.getW1(), brain.getW2(), brain.getB1(), brain.getB2());
-//
-//        return clone;
-//    }
+    public Doodle duplicate(){
+        Doodle clone = new Doodle(this);
+
+
+        return clone;
+    }
 
     //Method that randomly mutates n genes according to a rate by assigning unfirmoly randon new values
 //    public void unbiased_weight_mutation(double rate){
@@ -313,12 +348,12 @@ public class Doodle implements  Element {
 //        }
 //    }
 
-//    public Doodle breed(Doodle d){
-//        int hidden_layer_size = d.getBrain().getHidden_layer_size();
-//
-//        Doodle child = new Doodle()
-//
-//    }
+    public Doodle breed(Doodle d){
+        Doodle child = new Doodle(this.getPosition().getX(), this.getContainer(), this.getWorld(), this.getGenePool());
+
+
+        return child;
+    }
 
 
 

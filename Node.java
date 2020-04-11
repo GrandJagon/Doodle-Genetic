@@ -1,20 +1,27 @@
 package com.company;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public class Node {
     //List of input, output and hidden nodes connected to it
     private double value;
     private ArrayList<Connection> inConnections;
     private int type;
-    private int index;
+    private int innovation;
 
-    public Node(int type, int index){
+    public Node(int index){
+        if(index <= Constants.INPUT_NODES){
+            type = 0;
+        }else if(index > Constants.INPUT_NODES && index <= (Constants.INPUT_NODES + Constants.OUTPUT_NODES)){
+            type = 2;
+        }else{
+            type = 3;
+        }
         this.type = type;
         this.inConnections = new ArrayList<>();
-        this.index = index;
+        this.innovation = index;
     }
+
 
     public int getType() {
         return type;
@@ -36,7 +43,18 @@ public class Node {
         this.inConnections.add(connection);
     }
 
-    public int getIndex(){
-        return index;
+    public int getInnovation(){
+        return innovation;
     }
+
+    public void setInnovation(int innovation){
+        this.innovation = innovation;
+    }
+
+    public Node copy(){
+        Node copy = new Node(this.innovation);
+        return copy;
+    }
+
+
 }

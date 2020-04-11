@@ -14,8 +14,10 @@ public interface Constants {
     static final int PLATFORM_POP_RATIO = 60;
     static final int INPUT_NODES = 7;
     static final int OUTPUT_NODES = 3;
-    static final double WEIGHT_CHANGE_CHANCE = 0.7;
-    static final double ADDING_NODE_CHANCE = 0.1;
+    static final int BASE_NODES = INPUT_NODES + OUTPUT_NODES;
+    static final double WEIGHT_CHANGE_CHANCE = 0.5;
+    static final double WEIGHT_MUTATION_RATE = 0.2;
+    static final double ADDING_NODE_CHANCE = 0.4;
     static final double ADDING_CONNECTION_CHANCE = 0.2;
     static final double DISABLING_CONNECTION_CHANCE = 0.2;
 }

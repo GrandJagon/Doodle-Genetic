@@ -7,7 +7,7 @@ import java.util.LinkedList;
 
 public class GeneticPool {
     private int size;
-    private int innovation_number;
+    private InnovationController innovationController;
     private ArrayList<Doodle> individuals;
     private LinkedList<Doodle> aliveDoodles;
     private double populationMutationRate;
@@ -15,10 +15,9 @@ public class GeneticPool {
     private double selectionRate;
     private World world;
 
-    public GeneticPool(int size, double populationMutationRate, double mutationRate, double selectionRate, World world){
+    public GeneticPool(int size, double selectionRate, World world){
         this.size = size;
-        this.populationMutationRate = populationMutationRate;
-        this.mutationRate = mutationRate;
+        this.innovationController = new InnovationController();
         this.selectionRate = selectionRate;
         this.world = world;
         this.individuals = new ArrayList<>();
@@ -37,6 +36,10 @@ public class GeneticPool {
         return aliveDoodles;
     }
 
+    public InnovationController getInnovationController() {
+        return innovationController;
+    }
+
     public int getAverageScore(){
         int total = 0;
         for (Doodle d: individuals
@@ -49,10 +52,6 @@ public class GeneticPool {
         return total;
     }
 
-    public int getInnovationNumber(){
-        innovation_number++;
-        return innovation_number;
-    }
 
     public Doodle getHighestDoodle(){
         Doodle highestDoodle = aliveDoodles.get(0);
@@ -76,14 +75,6 @@ public class GeneticPool {
         return bestDoodle;
     }
 
-    public int getInnovation_number() {
-        return innovation_number;
-    }
-
-    public void setInnovation_number(int innovation_number) {
-        this.innovation_number = innovation_number;
-    }
-
     public ArrayList<Doodle> getIndividuals(){
         return individuals;
     }
@@ -99,6 +90,7 @@ public class GeneticPool {
 
         for(int i = 0; i < individuals.size(); i++){
             System.out.println("Doodle number "+ (i+1) + " score : "+individuals.get(i).getScore());
+            individuals.get(i).getNN().setScore(individuals.get(i).getScore());
         }
 
     }
@@ -118,15 +110,15 @@ public class GeneticPool {
 
     }
 
-//    public void duplication(){
-//        int j = 0;
-//        for(int i = individuals.size(); i < size; i++){
-//            Doodle individual = individuals.get(j);
-//            individuals.add(individual.duplicate());
-//            j++;
-//        }
-//    }
-//
+    public void duplication(){
+        int j = 0;
+        for(int i = individuals.size(); i < size; i++){
+            Doodle individual = individuals.get(j);
+            individuals.add(individual.duplicate());
+            j++;
+        }
+    }
+
     public void newRandomIndividuals(){
         int j = 0;
         for(int i = individuals.size(); i < size; i++){
@@ -134,6 +126,7 @@ public class GeneticPool {
             individuals.add(new Doodle(Constants.FRAME_WIDTH/2, aliveDoodles, world, this));
             j++;
         }
+        System.out.println(j+" random individuals have been added to the population");
     }
 
 
