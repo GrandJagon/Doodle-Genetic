@@ -2,7 +2,7 @@ package com.company;
 
 import java.util.*;
 
-public class Genome implements NN{
+public class Genome {
     private TreeMap<Integer, Node> nodes;
     private ArrayList<Connection> connections;
     private Random rand;
@@ -32,7 +32,6 @@ public class Genome implements NN{
     }
 
     public void create(){
-        System.out.println("Creation of new individual....");
         int connection_innovation = 1;
 
         for(int i = 1; i <= Constants.INPUT_NODES; i++){
@@ -40,25 +39,22 @@ public class Genome implements NN{
                 double weight = Calc.randomDouble(-1, 1);
                 Connection conn = new Connection(i, j, weight, connection_innovation);
                 connections.add(conn);
-                System.out.println("New connection created between "+i+" and "+j+ " for new individual with innovation number "+connection_innovation+" with weight = "+weight);
                 connection_innovation++;
             }
         }
     }
 
     public void generateNN(){
-        System.out.println("Generation of NN....");
+        nodes.clear();
         for (Connection c : connections
              ) {
 
             if(!nodes.containsKey(c.getInNode())){
                 nodes.put(c.getInNode(), new Node(c.getInNode()));
-                System.out.println("Node "+c.getInNode()+" created and added to NN");
             }
 
             if(!nodes.containsKey(c.getOutNode())){
                 nodes.put(c.getOutNode(), new Node(c.getOutNode()));
-                System.out.println("Node "+c.getOutNode()+" created and added to NN");
             }
 
             nodes.get(c.getOutNode()).addInConnection(c);
@@ -99,19 +95,20 @@ public class Genome implements NN{
     public double[] feedForward() {
         Node inNode;
 
-        for(int i = nodes.size() ; i > Constants.INPUT_NODES; i--){
+        for(Map.Entry<Integer, Node> nodeEntry : nodes.entrySet()){
             double total = 0;
 
-            for (Connection conn: nodes.get(i).getInConnections()
-                 ) {
-                inNode = nodes.get(conn.getInNode());
+            if(nodeEntry.getKey() > Constants.INPUT_NODES){
+                for(Connection conn : nodeEntry.getValue().getInConnections()){
+                    inNode = nodes.get(conn.getInNode());
 
-               if(conn.isEnabled() && inNode.getValue() > 0){
-                   total += (inNode.getValue() * conn.getWeight());
-               }
+                    if(conn.isEnabled()){
+                        total += (inNode.getValue() * conn.getWeight());
+                    }
+                }
+                nodeEntry.getValue().setValue(Calc.sigmoid(total));
             }
-            nodes.get(i).setValue(Calc.sigmoid(total));
-            System.out.println("Value of node "+i+" = "+Calc.sigmoid(total));
+
         }
 
         double[] Y = new double[Constants.OUTPUT_NODES];
@@ -124,6 +121,8 @@ public class Genome implements NN{
     }
 
     public void mutate(){
+        System.out.println("---------------MUTATION "+this+" GENERATION -----------------");
+        System.out.println("Number of connections before mutation :"+connections.size());
         int dice = rand.nextInt(100);
 
         double a = Constants.WEIGHT_CHANGE_CHANCE * 100;
@@ -146,6 +145,8 @@ public class Genome implements NN{
         if(dice > (a + b + c) && dice <= (a + b + c + d)){
             addNode();
         }
+
+        System.out.println("Number of connections after mutation :"+connections.size());
     }
 
     public void changeRandomWeight(double weight_mutation_rate){
@@ -169,11 +170,18 @@ public class Genome implements NN{
     }
 
     public void addRandomConnection(){
-        int i = rand.nextInt(nodes.size() - 1);
-        int j = rand.nextInt(nodes.size() - 1);
 
-        Node n1 = nodes.get(i);
-        Node n2 = nodes.get(j);
+        Set nodeSet = nodes.navigableKeySet();
+
+        int i = rand.nextInt(nodeSet.size() - 1);
+        int j = rand.nextInt(nodeSet.size() - 1);
+
+        int n1i  = (int) nodeSet.toArray()[i];
+        int n2i = (int) nodeSet.toArray()[j];
+
+        Node n1 = nodes.get(n1i);
+        Node n2 = nodes.get(n2i);
+
 
         if(n2.getType() == 0 || n1.getType() == 2 || (n1.getType() == 0 && n2.getType() == 0) || (n1.getType() == 2 && n2.getType() == 2)){
             System.out.println("Adding new weight not possible as node 1 = " + n1.getType() + " and node 2 = " + n2.getType());
@@ -212,15 +220,22 @@ public class Genome implements NN{
 
         Node newNode = new Node(nodeInnovationNumber);
 
-        int connectionInnovationNumber = genePool.getInnovationController().assignConnectionNumber(input.getInnovation(), newNode.getInnovation());
+        int inConnectionInnovationNumber = genePool.getInnovationController().assignConnectionNumber(input.getInnovation(), newNode.getInnovation());
+        int outConnectionInnovationNumber = genePool.getInnovationController().assignConnectionNumber(newNode.getInnovation(), output.getInnovation());
 
-        Connection newConn = new Connection(input.getInnovation(), output.getInnovation(), 1, connectionInnovationNumber);
-        newNode.addInConnection(newConn);
+        Connection newConnIn = new Connection(input.getInnovation(), newNode.getInnovation(), 1, inConnectionInnovationNumber);
+        Connection newConnOut = new Connection(newNode.getInnovation(), output.getInnovation(), Calc.randomDouble(-1,1), outConnectionInnovationNumber);
+
+        newNode.addInConnection(newConnIn);
+        output.addInConnection(newConnOut);
+        conn.disable();
 
         nodes.put(newNode.getInnovation(), newNode);
-        connections.add(newConn);
+        connections.add(newConnIn);
+        connections.add(newConnOut);
 
-        System.out.println("New node added between node " + input.getInnovation() + " and node " + output.getInnovation());
+        System.out.println("New node "+newNode.getInnovation()+" added between node " + input.getInnovation() + " and node " + output.getInnovation() +
+                " as well as connection "+conn.getInnovation_number()+" replaced by connections " + newConnIn.getInnovation_number()+ " and " +newConnOut.getInnovation_number());
     }
 
     public Genome clone(){
@@ -228,74 +243,66 @@ public class Genome implements NN{
         return child;
     }
 
-    public void crossBaseConnections(Genome genome2, Genome child){
-        for(int i = 1; i <= child.getConnections().size(); i++){
-            int dice = rand.nextInt(100);
 
-            Connection parentConnection ;
+   public Genome crossOver(Genome parent2){
 
-            if(dice < 50){
-                parentConnection = this.getConnections().get(i);
-            }else{
-                parentConnection = genome2.getConnections().get(i);
-            }
+        Genome child = new Genome(genePool);
+        
+        TreeMap<Integer, Connection> DNA1 = new TreeMap<>();
+        TreeMap<Integer, Connection> DNA2 = new TreeMap<>();
 
-            child.getConnections().get(i).setWeight(parentConnection.getWeight());
-            child.getConnections().get(i).setActivation(parentConnection.isEnabled());
-            System.out.println("Connection number "+i+" inherited from parent "+dice+" with weight :"+parentConnection.getWeight()+" and enabled ="+parentConnection.isEnabled());
-        }
-    }
+       for (Connection conn: this.connections
+            ) {
+           if(!DNA1.containsValue(conn.getInnovation_number())){
+               DNA1.put(conn.getInnovation_number(), conn);
+           }
+       }
 
-//    public void crossExtraGenes(Genome genome2, Genome child){
-//        int extraNodesParent1 = this.getNodes().size() - Constants.BASE_NODES;
-//        int extraNodesParent2 = genome2.getNodes().size() - Constants.BASE_NODES;
-//        Genome mostEvolved;
-//        Genome fittest = null;
-//
-//        if(this.getScore() > genome2.getScore()){
-//            fittest = this;
-//        }else if(this.getScore() < genome2.getScore()){
-//            fittest = genome2;
-//        }
-//
-//        if(extraNodesParent1 == 0 && extraNodesParent2 == 0){
-//            System.out.println("Neither of both parent have evolved new nodes through evolution");
-//            return;
-//        }
-//
-//        if(extraNodesParent1 > extraNodesParent2){
-//            mostEvolved = this;
-//        }else{
-//            mostEvolved = genome2;
-//        }
-//
-//        if (extraNodesParent1 == 0 || extraNodesParent2 == 0){
-//            System.out.println("One of the genomes has not evolved new nodes through evolution");
-//            if(mostEvolved == fittest){
-//                System.out.println("Fittest genome is also the most evolved, starting to pass nodes to offspring");
-//                for(int i = Constants.BASE_NODES + 1; i < mostEvolved.getNodes().size(); i++){
-//                    Node parentNode = mostEvolved.getNodes().get(i);
-//                    Node inheritedNode = new Node(1, mostEvolved.getNodes().get(i).getInnovation());
-//                    child.getNodes().add(inheritedNode);
-//
-//                }
-//            }
-//        }
-//
-//    }
+       for (Connection conn :parent2.getConnections()
+            ) {
+           if(!DNA2.containsKey(conn.getInnovation_number())){
+               DNA2.put(conn.getInnovation_number(), conn);
+           }
+       }
 
-//    public Genome crossOver(Genome genome2){
-//        Genome child = new Genome(genePool);
-//        child.create();
-//
-//        crossBaseConnections(genome2, child);
-//
-//
-//
-//
-//
-//    }
+       Set<Integer> allGenes = new HashSet<>(DNA1.keySet());
+       allGenes.addAll(DNA2.keySet());
 
+       for (Integer gene : allGenes
+            ) {
+           Connection inheritedGene = null;
+
+           if(DNA1.containsKey(gene) && DNA2.containsKey(gene)){
+               if(rand.nextBoolean()){
+                   inheritedGene = DNA1.get(gene).copy();
+               }else{
+                   inheritedGene = DNA2.get(gene).copy();
+               }
+           }else{
+               if(this.getScore() == parent2.getScore()){
+                   if(DNA1.containsKey(gene)){
+                       inheritedGene = DNA1.get(gene).copy();
+                   }else{
+                       inheritedGene = DNA2.get(gene).copy();
+                   }
+               }else{
+                   if(DNA1.containsKey(gene) && this.getScore() > parent2.getScore()){
+                       inheritedGene = DNA1.get(gene).copy();
+                   }else if(DNA2.containsKey(gene) && parent2.getScore() > this.getScore()){
+                       inheritedGene = DNA2.get(gene).copy();
+                   }
+               }
+           }
+           if(inheritedGene != null){
+               child.connections.add(inheritedGene);
+           }
+       }
+
+       System.out.println("Child successfully created with "+child.getConnections().size()+" connections from p1 with "+connections.size()+ " and p2 with "+parent2.connections.size());
+
+       return child;
+
+   }
 
 
 }

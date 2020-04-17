@@ -7,6 +7,7 @@ import java.util.LinkedList;
 
 public class GeneticPool {
     private int size;
+    private int generation;
     private InnovationController innovationController;
     private ArrayList<Doodle> individuals;
     private LinkedList<Doodle> aliveDoodles;
@@ -17,6 +18,7 @@ public class GeneticPool {
 
     public GeneticPool(int size, double selectionRate, World world){
         this.size = size;
+        this.generation = 1;
         this.innovationController = new InnovationController();
         this.selectionRate = selectionRate;
         this.world = world;
@@ -26,7 +28,8 @@ public class GeneticPool {
 
     public void populate(){
         for(int i = 0 ; i < size; i ++){
-            Doodle doodle = new Doodle(Constants.FRAME_WIDTH/2, aliveDoodles, world, this);
+            Doodle doodle = new Doodle(Constants.FRAME_WIDTH/2, aliveDoodles, world, this, generation);
+            doodle.initGenome();
             individuals.add(doodle);
             world.getElements().add(doodle);
         }
@@ -79,6 +82,10 @@ public class GeneticPool {
         return individuals;
     }
 
+    public int getGeneration(){
+        return generation;
+    }
+
     public void sortPopulation(){
 
         Collections.sort(individuals, new Comparator<Doodle>() {
@@ -89,8 +96,7 @@ public class GeneticPool {
         });
 
         for(int i = 0; i < individuals.size(); i++){
-            System.out.println("Doodle number "+ (i+1) + " score : "+individuals.get(i).getScore());
-            individuals.get(i).getNN().setScore(individuals.get(i).getScore());
+            individuals.get(i).getGenome().setScore(individuals.get(i).getScore());
         }
 
     }
@@ -98,6 +104,7 @@ public class GeneticPool {
     public void naturalSelection(){
 
         int amountToSave = (int) (individuals.size() * selectionRate);
+        System.out.println("Amount to save : "+amountToSave+" as individuals.size : "+individuals.size()+" and selection rate :"+selectionRate);
 
         ArrayList<Doodle> newGeneration = new ArrayList<>();
 
@@ -108,13 +115,15 @@ public class GeneticPool {
         individuals = newGeneration;
         this.aliveDoodles = new LinkedList<>();
 
+        System.out.println(individuals.size()+" left after natural selection");
+
     }
 
     public void duplication(){
         int j = 0;
         for(int i = individuals.size(); i < size; i++){
-            Doodle individual = individuals.get(j);
-            individuals.add(individual.duplicate());
+            Doodle copy = individuals.get(j).duplicate();
+            individuals.add(copy);
             j++;
         }
     }
@@ -122,19 +131,48 @@ public class GeneticPool {
     public void newRandomIndividuals(){
         int j = 0;
         for(int i = individuals.size(); i < size; i++){
-            Doodle individual = individuals.get(j);
-            individuals.add(new Doodle(Constants.FRAME_WIDTH/2, aliveDoodles, world, this));
+            Doodle newDoodle = new Doodle(Constants.FRAME_WIDTH/2, aliveDoodles, world, this, generation);
+            newDoodle.initGenome();
+            individuals.add(newDoodle);
             j++;
         }
-        System.out.println(j+" random individuals have been added to the population");
+        generation++;
+        System.out.println(j+" random individuals have been added to the population, now generation "+generation);
     }
 
 
     public void mutatePopulation(){
         for (Doodle d: individuals
              ) {
-            d.getNN().mutate();
+            d.getGenome().mutate();
         }
+    }
+
+    public void crossOver(){
+
+            int j = 0;
+            ArrayList<Doodle> offsprings = new ArrayList();
+
+            for(int i = individuals.size() - 1; i < size-1; i++){
+
+                int randNumber = Calc.randomIntOut(0, (individuals.size() - 1), j);
+
+                Doodle parent1 = individuals.get(j);
+                Doodle parent2 = individuals.get(randNumber);
+
+                offsprings.add(parent1.breed(parent2));
+
+                j++;
+
+                if(j == (individuals.size() - 1)){
+                    j = 0;
+                }
+            }
+
+            generation++;
+            System.out.println(offsprings.size()+ " offsprings generated, now generation "+generation);
+
+            individuals.addAll(offsprings);
     }
 
 }

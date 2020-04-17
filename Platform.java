@@ -41,11 +41,20 @@ public class Platform implements Element {
     public int getIndex() {return index;}
 
     public Platform getUpperPlatform(){
-        return container.get(index + 1);
+        int i = container.size() - 1;
+
+        if(index + 1 <= i){
+            return container.get(index + 1);
+        }else{
+            return this;
+        }
     }
 
     public void remove(){
+        if(container.contains(this)){
         container.remove(this);
+        System.out.println("Platform removed, new size of container is "+container.size());
+        }
     }
 
 

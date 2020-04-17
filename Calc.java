@@ -45,6 +45,17 @@ public class Calc {
         return rand.nextInt(19) + 1;
     }
 
+    public static int randomIntOut(int min, int max, int outNumber){
+
+        int randomNumber = rand.nextInt(((max - min)+1) + min);
+
+        if(randomNumber == outNumber) {
+            randomNumber = 5;
+        }
+
+        return randomNumber;
+    }
+
     public static double[][] randMatrix(int m, int n){
         double[][] a = new double[m][n];
 

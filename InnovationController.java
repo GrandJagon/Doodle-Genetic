@@ -44,14 +44,14 @@ public class InnovationController {
         for (Innovation innovation : node_innovation_pool
              ) {
             if(innovation.getInNodeNumber() == in && innovation.getOutNodeNumber() == out){
-                System.out.println("Innovation already existing within the pool with the number "+innovation.getInnovation_number());
+                System.out.println("Node innovation already existing within the pool with the number "+innovation.getInnovation_number());
                 return innovation.getInnovation_number();
             }
         }
 
         Innovation innovation = new Innovation(new_node_innovation(), in, out);
         node_innovation_pool.add(innovation);
-        System.out.println("No similar innovation found within the pool, new number assigned : "+node_innovation_number);
+        System.out.println("No similar node innovation found within the pool, new number assigned : "+node_innovation_number);
         return node_innovation_number;
     }
 
@@ -66,14 +66,14 @@ public class InnovationController {
         for (Innovation innovation : connection_innovation_pool
         ) {
             if(innovation.getInNodeNumber() == in && innovation.getOutNodeNumber() == out){
-                System.out.println("Innovation already existing within the pool with the number "+innovation.getInnovation_number());
+                System.out.println("Connection innovation already existing within the pool with the number "+innovation.getInnovation_number());
                 return innovation.getInnovation_number();
             }
         }
 
         Innovation innovation = new Innovation(new_connection_innovation(), in, out);
         connection_innovation_pool.add(innovation);
-        System.out.println("No similar innovation found within the pool, new number assigned : "+connection_innovation_number);
+        System.out.println("No similar connection innovation found within the pool, new number assigned : "+connection_innovation_number);
         return connection_innovation_number;
     }
 

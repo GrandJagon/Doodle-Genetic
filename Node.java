@@ -13,13 +13,14 @@ public class Node {
         if(index <= Constants.INPUT_NODES){
             type = 0;
         }else if(index > Constants.INPUT_NODES && index <= (Constants.INPUT_NODES + Constants.OUTPUT_NODES)){
-            type = 2;
+            type = 1;
         }else{
-            type = 3;
+            type = 2;
         }
         this.type = type;
         this.inConnections = new ArrayList<>();
         this.innovation = index;
+        this.value = 0;
     }
 
 
