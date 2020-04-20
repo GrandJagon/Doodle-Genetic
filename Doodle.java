@@ -42,24 +42,6 @@ public class Doodle implements  Element {
         this.generation = generation;
     }
 
-    public Doodle(Doodle parent){
-        this.position = new Vector(parent.getPosition().getX(), Constants.FRAME_HEIGHT - height);
-        this.alive = true;
-        this.width = 20;
-        this.height = 20;
-        this.score = 0;
-        this.weight = Constants.DOODLE_WEIGHT;
-        this.onGround = false;
-        this.onJump = false;
-        this.velocityFinal = new Vector(0,0);
-        this.motionVelocity = new Vector(0,0);
-        this.container = parent.getContainer();
-        this.container.add(this);
-        this.world = parent.getWorld();
-        this.genome = parent.getGenome().clone();
-        this.genome.generateNN();
-    }
-
     public void initGenome(){
         this.genome = new Genome(this.genePool);
         genome.create();
@@ -115,7 +97,7 @@ public class Doodle implements  Element {
     @Override
     public void paint(Graphics2D graphics, Camera c) {
         tempY = position.getY() - c.getTop();
-        graphics.setPaint(Color.getHSBColor(255, 255, 50 + (255/(genome.getHidden()*10))));
+        graphics.setPaint(Color.getHSBColor(255, 255, 50 + (255/(genome.getNodes()*10))));
         graphics.drawOval(position.getX(), tempY, width, height);
         graphics.fillOval(position.getX(), tempY, width, height);
     }
@@ -224,7 +206,7 @@ public class Doodle implements  Element {
     public void updateScore() {
         if (ground != null) {
             if(score < ground.getIndex()){
-               score += ground.getIndex();
+               score = ground.getIndex();
             }
         }
     }
@@ -292,13 +274,6 @@ public class Doodle implements  Element {
         }
     }
 
-    //Returns the exact same doodle from the original one
-    public Doodle duplicate(){
-        Doodle clone = new Doodle(this);
-
-
-        return clone;
-    }
 
     public Doodle breed(Doodle d){
         Doodle child = new Doodle(this.getPosition().getX(), this.getContainer(), this.getWorld(), this.getGenePool(), this.generation+1);

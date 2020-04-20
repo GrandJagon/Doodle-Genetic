@@ -69,7 +69,7 @@ public class Genome {
         return genePool;
     }
 
-    public int getHidden(){
+    public int getNodes(){
         return nodes.size();
     }
 
@@ -153,7 +153,7 @@ public class Genome {
         for (Connection c: connections
              ) {
             if(rand.nextInt(100) < weight_mutation_rate){
-                c.setWeight(c.getWeight() + Calc.randomDouble(-0.3, 0.3));
+                c.setWeight(c.getWeight() + Calc.randomDouble(-0.2, 0.2));
             }
         }
 

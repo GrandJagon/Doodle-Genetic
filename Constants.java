@@ -24,5 +24,7 @@ public interface Constants {
     static final double ADDING_CONNECTION_CHANCE = 0.2;
     static final double DISABLING_CONNECTION_CHANCE = 0.2;
     static final boolean AUTOMATIC = true;
-    static final Font TIMER_FONT = new Font("COURIER", Font.BOLD, 8);
+    static final Font TIMER_FONT = new Font("COURIER", Font.BOLD, 14);
+    static final int DAHSBOARD_WIDTH = 500;
+    static final int DASHBOARD_HEIGHT = 700;
 }

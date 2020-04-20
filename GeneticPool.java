@@ -104,29 +104,22 @@ public class GeneticPool {
     public void naturalSelection(){
 
         int amountToSave = (int) (individuals.size() * selectionRate);
-        System.out.println("Amount to save : "+amountToSave+" as individuals.size : "+individuals.size()+" and selection rate :"+selectionRate);
 
         ArrayList<Doodle> newGeneration = new ArrayList<>();
+        aliveDoodles.clear();
+
 
         for(int i = 0; i < amountToSave; i++){
+            individuals.get(i).reset();
             newGeneration.add(individuals.get(i));
         }
 
+
         individuals = newGeneration;
-        this.aliveDoodles = new LinkedList<>();
 
         System.out.println(individuals.size()+" left after natural selection");
-
     }
 
-    public void duplication(){
-        int j = 0;
-        for(int i = individuals.size(); i < size; i++){
-            Doodle copy = individuals.get(j).duplicate();
-            individuals.add(copy);
-            j++;
-        }
-    }
 
     public void newRandomIndividuals(){
         int j = 0;
@@ -155,10 +148,17 @@ public class GeneticPool {
 
             for(int i = individuals.size() - 1; i < size-1; i++){
 
-                int randNumber = Calc.randomIntOut(0, (individuals.size() - 1), j);
+                int randNumber = j;
+
+                while(randNumber == j){
+                    randNumber = Calc.randomInt(0, individuals.size() - 1);
+                }
+
+                System.out.println("Individuals size :"+individuals.size()+" j = "+j+"  random number = "+randNumber);
 
                 Doodle parent1 = individuals.get(j);
                 Doodle parent2 = individuals.get(randNumber);
+
 
                 offsprings.add(parent1.breed(parent2));
 

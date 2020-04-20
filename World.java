@@ -38,7 +38,7 @@ public class World extends JPanel implements Runnable {
         ptIndex = 0;
         popRatio = Constants.PLATFORM_POP_RATIO;
         rand = new Random();
-        genePool = new GeneticPool(50, 0.25,this);
+        genePool = new GeneticPool(50, 0.1,this);
         genePool.populate();
         gameStats = dashboard;
         gameStats.init(genePool);
@@ -120,7 +120,6 @@ public class World extends JPanel implements Runnable {
             d.updateScore();
         }
         gameStats.updateDashboard();
-        timer--;
     }
 
     public void render(){
@@ -142,7 +141,8 @@ public class World extends JPanel implements Runnable {
         if(Constants.AUTOMATIC){
             offGraphics.setColor(Color.BLUE);
             offGraphics.setFont(timerFont);
-            offGraphics.drawString(String.valueOf(timer/30), 475, 15);
+            offGraphics.drawString(String.valueOf(timer/32), 475, 15);
+            timer--;
         }
     }
 
@@ -161,8 +161,10 @@ public class World extends JPanel implements Runnable {
         genePool.sortPopulation();
         genePool.naturalSelection();
         genePool.crossOver();
+        System.out.println("Alive doodle after crossover : "+genePool.getAliveDoodles().size());
         genePool.mutatePopulation();
         if(Constants.AUTOMATIC){
+            timer = Constants.TIMER;
             launchNextGeneration();
         }
     }
@@ -179,11 +181,8 @@ public class World extends JPanel implements Runnable {
         gameStats.reset();
         for (Doodle d : genePool.getIndividuals()
              ) {
-            d.reset();
-            d.setContainer(genePool.getAliveDoodles());
             elements.add(d);
         }
-        timer = Constants.TIMER;
         start();
     }
 
@@ -195,7 +194,17 @@ public class World extends JPanel implements Runnable {
         startTime = System.currentTimeMillis();
         delay = 30;
 
+        if(Constants.AUTOMATIC){
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
         running = true;
+
+        System.out.println("RUN, delay "+delay);
 
         while(running){
 

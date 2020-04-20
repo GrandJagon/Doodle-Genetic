@@ -12,9 +12,11 @@ public class Dashboard extends JPanel {
     private JLabel alive_individuals;
     private JLabel generation;
     private JLabel average_score;
+    private JPanel infos;
     private Button startButton;
-    private Button newGeneration;
     private Button stopButton;
+    private JPanel buttons;
+    private JTable logTable;
     private World world;
     private GeneticPool genePool;
 
@@ -32,10 +34,24 @@ public class Dashboard extends JPanel {
         individuals = new JLabel("Number of individuals in the generation :");
         alive_individuals = new JLabel("Number of individuals alive in the generation");
         generation = new JLabel("GENERATION ");
+        generation.setHorizontalAlignment(SwingConstants.LEFT);
+
+        this.infos = new JPanel();
+        infos.add(generation);
+        infos.add(individuals, LEFT_ALIGNMENT);
+        infos.add(alive_individuals, LEFT_ALIGNMENT);
+        infos.add(score, LEFT_ALIGNMENT);
+        infos.add(average_score, LEFT_ALIGNMENT);
+        infos.setLayout(new BoxLayout(infos, BoxLayout.Y_AXIS));
+        infos.setAlignmentX(SwingConstants.LEFT);
 
 
         stopButton = new Button("END GENERATION");
-        newGeneration = new Button("LAUNCH NEW GENERATION");
+        startButton = new Button("LAUNCH NEW GENERATION");
+
+        buttons = new JPanel();
+        buttons.add(stopButton, LEFT_ALIGNMENT);
+        buttons.add(startButton, RIGHT_ALIGNMENT);
 
         stopButton.addActionListener(new ActionListener() {
             @Override
@@ -44,20 +60,16 @@ public class Dashboard extends JPanel {
             }
         });
 
-        newGeneration.addActionListener(new ActionListener() {
+        startButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
                 world.launchNextGeneration();
             }
         });
 
-        add(score);
-        add(average_score);
-        add(individuals);
-        add(alive_individuals);
-        add(generation);
-        add(stopButton);
-        add(newGeneration);
+        add(infos, LEFT_ALIGNMENT);
+        add(buttons);
+
     }
 
     public void updateDashboard(){
