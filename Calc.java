@@ -42,7 +42,7 @@ public class Calc {
     }
 
     public static int randomInt(int min, int max){
-        return rand.nextInt(max + 1 - min) + min;
+        return (min + (int) (Math.random() * ((max - min) + 1)));
     }
 
     public static double[][] randMatrix(int m, int n){

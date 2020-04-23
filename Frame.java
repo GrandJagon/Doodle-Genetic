@@ -32,7 +32,7 @@ public class Frame extends JFrame {
 
         add(world, BorderLayout.WEST);
         add(dashboard, BorderLayout.CENTER);
-        setSize(Constants.FRAME_WIDTH * 2, Constants.FRAME_HEIGHT + 40);
+        setSize(Constants.FRAME_WIDTH, Constants.FRAME_HEIGHT + 40);
         world.init(dashboard);
     }
 }

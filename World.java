@@ -2,10 +2,6 @@ package com.company;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Random;
@@ -19,7 +15,7 @@ public class World extends JPanel implements Runnable {
     private ArrayList<Platform> platforms;
     private GeneticPool genePool;
     private Graphics2D offGraphics;
-    private Dashboard gameStats;
+    private Dashboard dashboard;
     private Image offImage;
     private Camera camera;
     private int ptIndex;
@@ -27,7 +23,7 @@ public class World extends JPanel implements Runnable {
     private Random rand;
 
     public void init(Dashboard dashboard){
-        setPreferredSize(new Dimension(Constants.FRAME_WIDTH, Constants.FRAME_HEIGHT));
+        setPreferredSize(new Dimension(Constants.WORLD_WIDTH, Constants.FRAME_HEIGHT));
         setBackground(Color.WHITE);
         setVisible(true);
         setFocusable(true);
@@ -38,10 +34,10 @@ public class World extends JPanel implements Runnable {
         ptIndex = 0;
         popRatio = Constants.PLATFORM_POP_RATIO;
         rand = new Random();
-        genePool = new GeneticPool(50, 0.1,this);
+        genePool = new GeneticPool(Constants.POOL_SIZE, Constants.SELECTION_RATE,this);
         genePool.populate();
-        gameStats = dashboard;
-        gameStats.init(genePool);
+        this.dashboard = dashboard;
+        this.dashboard.init(genePool);
         timerFont = Constants.TIMER_FONT;
 
         init_platforms();
@@ -57,12 +53,17 @@ public class World extends JPanel implements Runnable {
     }
 
     public Platform getFirstPlatform(){
-        return platforms.get(1);
+        return platforms.get(0);
+    }
+
+    public ArrayList<Platform> getPlatforms(){
+        return platforms;
     }
 
     public int getGeneration(){
         return this.genePool.getGeneration();
     }
+
 
     public LinkedList<Element> getElements(){
         return elements;
@@ -70,7 +71,9 @@ public class World extends JPanel implements Runnable {
 
     public void init_platforms(){
         for(int i = Constants.FRAME_HEIGHT - popRatio; i >=  0;  i -= popRatio) {
-            Platform pt = generate_platform(Constants.PLATFORM_MINIMUM_SPEED, Constants.PLATFORM_MAXIMUM_WIDTH, i);
+            int speed = Calc.randomInt(Constants.PLATFORM_MINIMUM_SPEED, Constants.PLATFORM_MAXIMUM_SPEED);
+            int width = Calc.randomInt(Constants.PLATFORM_MINIMUM_WIDTH, Constants.PLATFORM_MAXIMUM_WIDTH);
+            Platform pt = generate_platform(speed, width, i);
             elements.add(pt);
             platforms.add(pt);
         }
@@ -78,18 +81,16 @@ public class World extends JPanel implements Runnable {
 
     public Platform generate_platform(int speed, int width, int y){
         ptIndex++;
-        int x = rand.nextInt(Constants.FRAME_WIDTH - width);
+        int x = rand.nextInt(Constants.WORLD_WIDTH - width);
+        System.out.println("Platform generated with index = "+ptIndex+", speed = "+speed+" and width = "+width);
         return new Platform(x, y, width, speed, ptIndex, platforms);
     }
 
     public void addPlatform(){
-        System.out.println("Adding platform");
         int y = platforms.get(platforms.size() - 1).getPosition().getY();
-        System.out.println("Last patform at y = "+y);
         Platform pt = generate_platform(Constants.PLATFORM_MINIMUM_SPEED, Constants.PLATFORM_MAXIMUM_WIDTH, y - popRatio);
         elements.add(pt);
         platforms.add(pt);
-        System.out.println("New platform added at y = "+(y-popRatio)+" , new size of platform container is "+platforms.size());
     }
 
     public void start(){
@@ -119,17 +120,17 @@ public class World extends JPanel implements Runnable {
             }
             d.updateScore();
         }
-        gameStats.updateDashboard();
+        dashboard.updateDashboard();
     }
 
     public void render(){
         if(offImage == null){
-            offImage = this.createImage(Constants.FRAME_WIDTH, Constants.FRAME_HEIGHT);
+            offImage = this.createImage(Constants.WORLD_WIDTH, Constants.FRAME_HEIGHT);
             offGraphics = (Graphics2D) offImage.getGraphics();
         }
         camera.update(genePool.getHighestDoodle());
         offGraphics.setColor(Color.WHITE);
-        offGraphics.fillRect(0,0, Constants.FRAME_WIDTH, Constants.FRAME_HEIGHT);
+        offGraphics.fillRect(0,0, Constants.WORLD_WIDTH, Constants.FRAME_HEIGHT);
         for (Element element : elements
              ) {
             if(element.isOnScreen(camera)){
@@ -156,6 +157,7 @@ public class World extends JPanel implements Runnable {
 
     public void gameOver(){
         running = false;
+        dashboard.logScore();
         ptIndex = 0;
         camera.reset();
         genePool.sortPopulation();
@@ -178,7 +180,6 @@ public class World extends JPanel implements Runnable {
         elements = new LinkedList<>();
         platforms = new ArrayList<>();
         init_platforms();
-        gameStats.reset();
         for (Doodle d : genePool.getIndividuals()
              ) {
             elements.add(d);

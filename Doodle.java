@@ -107,7 +107,7 @@ public class Doodle implements  Element {
         this.score = 0;
         this.onGround = false;
         this.onJump = false;
-        this.position = new Vector(Constants.FRAME_WIDTH/2, Constants.FRAME_HEIGHT - height);
+        this.position = new Vector(Constants.WORLD_WIDTH/2, Constants.FRAME_HEIGHT - height);
         this.velocityFinal = new Vector(0,0);
         this.motionVelocity = new Vector(0,0);
         if(!container.contains(this)){
@@ -126,7 +126,7 @@ public class Doodle implements  Element {
     public void updateMotion() {
         if(onGround){
             if(ground != null && ground.getIndex() > 0 && ground.getIndex() > (score - 0.5)){
-                score += 0.0001;
+                score += 0.01;
             }
             velocityFinal.updateY(0);
             if (ground != null){
@@ -178,8 +178,8 @@ public class Doodle implements  Element {
     public void wallCollide(){
         if(position.getX() <= 0){
             position.setX(0);
-        }else if((position.getX() + width) >= Constants.FRAME_WIDTH){
-            position.setX(Constants.FRAME_WIDTH - width);
+        }else if((position.getX() + width) >= Constants.WORLD_WIDTH){
+            position.setX(Constants.WORLD_WIDTH - width);
         }
     }
 
@@ -208,6 +208,8 @@ public class Doodle implements  Element {
             if(score < ground.getIndex()){
                score = ground.getIndex();
             }
+        }else{
+            score = 0;
         }
     }
 
@@ -216,24 +218,24 @@ public class Doodle implements  Element {
         double gx;
         double gw;
         double gs;
-        double x = Calc.normalize(Constants.FRAME_WIDTH, 0, position.getX());
+        double x = Calc.normalize(Constants.WORLD_WIDTH, 0, position.getX());
         if(ground == null){
-            gx = Calc.normalize(Constants.FRAME_WIDTH, 0, 0);
-            gw = Calc.normalize(Constants.FRAME_WIDTH, 0, Constants.FRAME_WIDTH);
+            gx = Calc.normalize(Constants.WORLD_WIDTH, 0, 0);
+            gw = Calc.normalize(Constants.WORLD_WIDTH, 0, Constants.WORLD_WIDTH);
             gs = 0;
             upperPlatform = world.getFirstPlatform();
 
         }else{
-            gx = Calc.normalize(Constants.PLATFORM_MAXIMUM_WIDTH, Constants.PLATFORM_MINIMUM_WIDTH, ground.getWidth());
+            gx = Calc.normalize(Constants.PLATFORM_MAXIMUM_WIDTH, Constants.PLATFORM_MINIMUM_WIDTH, ground.getPosition().getX());
             gs = Calc.normalize(Constants.PLATFORM_MAXIMUM_SPEED, Constants.PLATFORM_MINIMUM_SPEED, ground.getSpeed());
             gw = Calc.normalize(Constants.PLATFORM_MAXIMUM_WIDTH, Constants.PLATFORM_MINIMUM_WIDTH, ground.getWidth());
             upperPlatform = ground.getUpperPlatform();
         }
-        double upx = Calc.normalize(Constants.FRAME_WIDTH, 0, upperPlatform.getPosition().getX());
+        double upx = Calc.normalize(Constants.WORLD_WIDTH, 0, upperPlatform.getPosition().getX());
         double ups = Calc.normalize(Constants.PLATFORM_MAXIMUM_SPEED, Constants.PLATFORM_MINIMUM_SPEED, upperPlatform.getSpeed());
         double upw = Calc.normalize(Constants.PLATFORM_MAXIMUM_WIDTH, Constants.PLATFORM_MINIMUM_WIDTH, upperPlatform.getWidth());
 
-        genome.feedInput(x, gx, gs, gw, upx, ups, upw);
+        genome.feedInput(x, gx, gw, upx, upw, gs, ups);
     }
 
     //Method that take the outputs of the forward propagation and interpret it in moves within the game, 4 output neurons

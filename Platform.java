@@ -41,10 +41,10 @@ public class Platform implements Element {
     public int getIndex() {return index;}
 
     public Platform getUpperPlatform(){
-        int i = container.size() - 1;
+        int size = container.size() - 1;
 
-        if(index + 1 <= i){
-            return container.get(index + 1);
+        if(index <= size){
+            return container.get(index);
         }else{
             return this;
         }
@@ -69,7 +69,7 @@ public class Platform implements Element {
     @Override
     public void update() {
         this.position.addX(this.speed);
-        if ((this.position.getX() + width) >= Constants.FRAME_WIDTH || this.position.getX() <= 0) {
+        if ((this.position.getX() + width) >= Constants.WORLD_WIDTH || this.position.getX() <= 0) {
             this.speed = (-this.speed);
         }
     }

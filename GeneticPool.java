@@ -43,11 +43,23 @@ public class GeneticPool {
         return innovationController;
     }
 
-    public int getAverageScore(){
-        int total = 0;
+    public double getAverageScore(){
+        double total = 0;
         for (Doodle d: individuals
              ) {
             total += d.getScore();
+        }
+
+        total = total / individuals.size();
+
+        return total;
+    }
+
+    public double getAverageNeurons(){
+        double total = 0;
+        for (Doodle d: individuals
+        ) {
+            total += d.getGenome().getNodes();
         }
 
         total = total / individuals.size();

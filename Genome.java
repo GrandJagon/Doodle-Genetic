@@ -82,14 +82,14 @@ public class Genome {
     }
 
     //Method that feeds all data relative to doodle environment in order to feed the forward propagation
-    public void feedInput(double doodleX, double groundX, double groundSpeed, double groundWidth, double upperPlatformX, double upperPlatformSpeed, double upperPlatFormWidth){
+    public void feedInput(double doodleX, double groundX, double groundWidth, double upperPlatformX,  double upperPlatFormWidth, double groundSpeed, double upperPlatformSpeed){
         nodes.get(1).setValue(doodleX);
         nodes.get(2).setValue(groundX);
-        nodes.get(3).setValue(groundSpeed);
-        nodes.get(4).setValue(groundWidth);
-        nodes.get(5).setValue(upperPlatformX);
-        nodes.get(6).setValue(upperPlatformSpeed);
-        nodes.get(7).setValue(upperPlatFormWidth);
+        nodes.get(3).setValue(groundWidth);
+        nodes.get(4).setValue(upperPlatformX);
+        nodes.get(5).setValue(upperPlatFormWidth);
+        nodes.get(6).setValue(groundSpeed);
+        nodes.get(7).setValue(upperPlatformSpeed);
     }
 
     public double[] feedForward() {
@@ -121,8 +121,6 @@ public class Genome {
     }
 
     public void mutate(){
-        System.out.println("---------------MUTATION "+this+" GENERATION -----------------");
-        System.out.println("Number of connections before mutation :"+connections.size());
         int dice = rand.nextInt(100);
 
         double a = Constants.WEIGHT_CHANGE_CHANCE * 100;
@@ -153,7 +151,7 @@ public class Genome {
         for (Connection c: connections
              ) {
             if(rand.nextInt(100) < weight_mutation_rate){
-                c.setWeight(c.getWeight() + Calc.randomDouble(-0.2, 0.2));
+                c.setWeight(c.getWeight() + Calc.randomDouble(-0.1, 0.1));
             }
         }
 
